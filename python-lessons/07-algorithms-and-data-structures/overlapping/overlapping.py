@@ -1,30 +1,39 @@
 def merge_intervals(intervals):
     # TODO: merge overlapping or touching intervals into consolidated ranges,
     # returned sorted by start value
-    new_list = []
+    merged_interval = []
+    sorted_interval = sorted(intervals)
 
-    for index, val in enumerate(intervals):
-        index+=1
-        start_val = val[0]
-        end_val = val[1]
+    if len(sorted_interval) <= 1:
+        return sorted_interval
+    
+    #handles list of tuples more than one (when there are more than one tuples inside the list)
+    for index, interval in enumerate(sorted_interval):
+        start_val = interval[0]
+        end_val = interval[1]
 
-        already_exist = (start_val, end_val) in new_list
-
-        if index != 1:
-            base_list = [i for i in range(start_val, end_val+1)]
+        if index == 0:
+            prev = (start_val, end_val)
             continue
         else:
-            if start_val in base_list and end_val in base_list:
-                if not already_exist:
-                    new_list.append((base_list[0],base_list[-1]))
-            elif start_val in base_list and end_val not in base_list:
-                if not already_exist:
-                    new_list.append((base_list[0], end_val))
-            else:
-                if not already_exist:
-                    new_list.append((base_list[0],base_list[-1]))
-                    new_list.append((start_val, end_val))
-    return new_list
+            if start_val <= prev[1]:
 
+                #this evealuates if the end_val is within the range of the previous tuple
+                # or outside. If it is within the range, it means that both start_val and
+                # end_val are both within the range of the previous tuple so
+                # the previous tuple is maintained going forward but if end_val
+                # is greater than the prev[1] value, it will be used instead - prev = (prev[0], end_val)
+                if end_val < prev[1]:
+                    end_val = prev[1]
+                prev = (prev[0], end_val)
+            elif start_val > prev[1]:
+                merged_interval.append(prev)
+                prev = (start_val, end_val)
+    merged_interval.append(prev)
+    return merged_interval
+
+#test cases
+print(merge_intervals([(8, 10), (1, 3), (2, 6)]))
 print(merge_intervals([(1, 3), (2, 6), (8, 10), (15, 18)]))
 print(merge_intervals([(1, 3), (1, 3), (1,3), (1,3)]))
+print(merge_intervals([]))
