@@ -14,50 +14,53 @@ def process_transactions(initial_balances, transactions):
 
     def update_sucessful(temp_ballance):
         mssge["balances"].update(temp_ballance)
-        temp_result = ["ok"]
-        mssge["results"] = temp_result
+        mssge["results"].append("ok")
     def update_rejected():
-        temp_result = ["rejected"]
-        mssge["results"] = temp_result
+        mssge["results"].append("rejected")
 
     def deposit(transaction, account):
-        if account in balances:
-            temp_balances[account] = balances[account] + transaction["amount"]
-            update_sucessful(temp_balances)
+        if account in balances and transaction["amount"] > 0:
+            return True
         else:
-            update_rejected()
-
+            return False
     def withdraw(transaction, account):
-        if account in balances:
-            if transaction["amount"] <= balances[account]:
-                temp_balances[account] = balances[account] - transaction["amount"]
-                update_sucessful(temp_balances)
-            else:
-                update_rejected()
+        if account in balances and transaction["amount"] > 0 and transaction["amount"] <= balances[account]:
+            return True
         else:
-            update_rejected()
+            return False
 
     for transaction in transactions:
         temp_balances = {}
         account_type = transaction["type"]
         if account_type == "deposit":
             account = transaction["account"]
-            deposit(transaction, account)
+            if deposit(transaction, account):
+                temp_balances[account] = balances[account] + transaction["amount"]
+                update_sucessful(temp_balances)
+            else:
+                update_rejected()
         elif account_type == "withdraw":
             account = transaction["account"]
-            withdraw(transaction, account)
+            if withdraw(transaction, account):
+                temp_balances[account] = balances[account] - transaction["amount"]
+                update_sucessful(temp_balances)
+            else:
+                update_rejected()
         elif account_type == "transfer":
-            _, From, To,_ = transaction.values()
-            if From in balances and To in balances:
-                withdraw(transaction, From)
-                deposit(transaction, To)
+            From, To = transaction["from"], transaction["to"]
+            if From in balances and To in balances and withdraw(transaction, From) and deposit(transaction, To):
+                temp_balances[From] = balances[From] - transaction["amount"]
+                temp_balances[To] = balances[To] + transaction["amount"]
+                update_sucessful(temp_balances)
             else:
                 update_rejected(temp_result)
+        else:
+            update_rejected()
     return mssge
 
-print(process_transactions({"A": 100}, [{"type": "deposit", "account": "A", "amount": 50}, {"type": "withdraw", "account": "A", "amount": 100}]))
-#{"balances": {"A": 150}, "results": ["ok"]}
-print(process_transactions({"A": 100}, [{"type": "withdraw", "account": "A", "amount": 200}]))
-#{"balances": {"A": 100}, "results": ["rejected"]}
+print(process_transactions({"A": 100}, [{"type": "deposit", "account": "A", "amount": 0}, {"type": "withdraw", "account": "A", "amount": 100}]))
+#{"balances": {"A": 0}, "results": ["rejected","ok"]}
+print(process_transactions({"A": 100}, [{"type": "withdraw", "account": "A", "amount": 10}]))
+#{"balances": {"A": 90}, "results": ["ok"]}
 print(process_transactions({"A": 100, "B": 0}, [{"type": "transfer", "from": "A", "to": "B", "amount": 40}]))
 #{"balances": {"A": 60, "B": 40}, "results": ["ok"]}
