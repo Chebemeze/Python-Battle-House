@@ -4,6 +4,13 @@ def merge_intervals(intervals):
     merged_interval = []
     sorted_interval = sorted(intervals)
 
+    #bubble sort can also do the sorting as seen below but its time complexity is poor
+    # sorted_interval = [i for i in intervals]
+    # for i in range(len(sorted_interval)-1):
+    #     for j in range(len(sorted_interval)-1-i):
+    #         if sorted_interval[j][0] > sorted_interval[j+1][0]:
+    #             sorted_interval[j], sorted_interval[j+1] = sorted_interval[j+1], sorted_interval[j]
+
     if len(sorted_interval) <= 1:
         return sorted_interval
     
