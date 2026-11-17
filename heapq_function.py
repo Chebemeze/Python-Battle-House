@@ -2,7 +2,8 @@ import heapq
 
 n = [5,4,10,1,2,3,4]
 print(f"n is initially {n}")
-lowest = heapq.heappop(n)
+heapq.heapify(n)
+lowest = heapq.heappop()
 heapq.heappush(n, 8)
 print(f"The lowest is {lowest}")
 print(f"n is now {n}")
